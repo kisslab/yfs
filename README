@@ -1,0 +1,46 @@
+
+In this sequence of labs, you'll build a multi-server file system called Yet-Another File System (yfs) in the spirit of Frangipani. At the end of all the labs, your file server architecture will look like this:
+
+You'll write a file server process, labeled yfs above, using the FUSE toolkit. Each client host will run a copy of yfs. yfs will appear to local applications on the same machine by registering via FUSE to receive file system events from the operating system. The yfs extent server will store all the file system data on an extent server on the network, instead of on a local disk. yfs servers on multiple client hosts can share the file system by sharing a single extent server.
+
+This architecture is appealing because (in principle) it shouldn't slow down very much as you add client hosts. Most of the complexity is in the per-client yfs program, so new clients make use of their own CPUs rather than competing with existing clients for the server's CPU. The extent server is shared, but hopefully it's simple and fast enough to handle a large number of clients. In contrast, a conventional NFS server is pretty complex (it has a complete file system implementation) so it's more likely to be a bottleneck when shared by many NFS clients.
+
+You must write all the code you hand in for the programming assignments, except for code that we give you as part of the assignment. You are not allowed to look at anyone else's solution (and you're not allowed to look at code from previous years). You may discuss the assignments with other students, but you may not look at or copy each others' code.
+
+Firstly, in order to use our git server, you should provide with a rsa key for SSH access. If you have generated the key in OS course with no changes, you can skip these steps.
+
+To generate a rsa key,you can use ssh-keygen and set the password you as like. 
+e.g. ssh-keygen -t rsa -C "your_email@youremail.com" 
+If you keep a default configuration of SSH, the key should be saved as: /home/your_user_name/.ssh/id_rsa /home/your_user_name/.ssh/id_rsa.pub
+Change the public key name to be like studentID.pub, and send the public key to TA with E-mail.
+You should be able to do Lab 1 on any Unix-style machine, including your own Linux/FreeBSD desktops, MacOS laptops, or any Debian SunOS/Linux workstation.
+
+For Labs 2 and beyond, you'll need to use a computer that has the FUSE module, library, and headers installed. You should be able to install these on your own machine by following the instructions at fuse.sourceforge.net. However, the official programming environment for this class will be the Debian Linux machines. What we mean by official is that we will be testing your assignments using that environment, so please make sure your code passes the tests on an Debian Linux machine.
+
+Note that you if you have your own FreeBSD or MacOS machines that you prefer to use for programming, you should be able to use them for the majority of the work. However, there are minor annoying differences between FUSE on Linux and FUSE on other operating systems that may cause your code to fail our tests when it seems to pass for you. As an example, on Linux FUSE passes file creation operation to the file system using the MKNOD call, while on other systems it uses CREATE. Please ensure that your assignment passes the tests in the Debian Linux environment, and there shouldn't be any problems when we test it.
+
+There are a number of resources available to help you with the lab portion of this course:
+
+C++ Standard Template Library:
+You will use C++ STL classes such as map and string a lot, so it's worth while to be familiar with the methods they offer; have a look here.
+
+pthreads:
+All the labs use the POSIX threads API (pthreads). A comprehensive guide to programming with pthreads can be found here: http://www.llnl.gov/computing/tutorials/pthreads/
+
+FUSE:
+The labs use the FUSE interface to plug the lab file system into the operating system. See the FUSE website for more information.
+
+Debugging and Core files:
+printf statements are often the best way to debug. You may also want to use gdb, the GNU debugger. You may find this gdb reference useful. Below are a few tips.
+
+If your program crashes and leaves a core dump file, you can see where the crash occured with gdb program core, where program is the name of the executable. Type bt to examine the call stack at the time of the crash.
+
+If you know your program is likely to have a problem, you can run it with gdb from the beginning, using gdb program. Then type run.
+
+If your program is already running (or it is hard to start with gdb due to complex start-up scripts), you can attach gdb to it by typing gdb program 1234, where 1234 is the process ID of your running program.
+
+While in gdb, you can set breakpoints (use the gdb command b) to stop the execution at specific points, examine variable contents (print ...), get a list of threads (info threads), switch threads (thread X), etc.
+
+To apply a given gdb command to all threads in your program, prepend thread apply all to your command. For example, thread apply all bt dumps the backtrace for all threads.
+
+Look at the GDB manual for full documentation.
