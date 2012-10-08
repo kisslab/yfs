@@ -72,6 +72,7 @@
 
 #include "jsl_log.h"
 #include "gettime.h"
+#include "lang/verify.h"
 
 const rpcc::TO rpcc::to_max = { 120000 };
 const rpcc::TO rpcc::to_min = { 1000 };
@@ -79,14 +80,14 @@ const rpcc::TO rpcc::to_min = { 1000 };
 rpcc::caller::caller(unsigned int xxid, unmarshall *xun)
 : xid(xxid), un(xun), done(false)
 {
-	assert(pthread_mutex_init(&m,0) == 0);
-	assert(pthread_cond_init(&c, 0) == 0);
+	VERIFY(pthread_mutex_init(&m,0) == 0);
+	VERIFY(pthread_cond_init(&c, 0) == 0);
 }
 
 rpcc::caller::~caller()
 {
-	assert(pthread_mutex_destroy(&m) == 0);
-	assert(pthread_cond_destroy(&c) == 0);
+	VERIFY(pthread_mutex_destroy(&m) == 0);
+	VERIFY(pthread_cond_destroy(&c) == 0);
 }
 
 inline
@@ -99,11 +100,11 @@ void set_rand_seed()
 
 rpcc::rpcc(sockaddr_in d, bool retrans) : 
 	dst_(d), srv_nonce_(0), bind_done_(false), xid_(1), lossytest_(0), 
-	retrans_(retrans), reachable_(true), chan_(NULL), destroy_wait_ (false)
+	retrans_(retrans), reachable_(true), chan_(NULL), destroy_wait_ (false), xid_rep_done_(-1)
 {
-	assert(pthread_mutex_init(&m_, 0) == 0);
-	assert(pthread_mutex_init(&chan_m_, 0) == 0);
-	assert(pthread_cond_init(&destroy_wait_c_, 0) == 0);
+	VERIFY(pthread_mutex_init(&m_, 0) == 0);
+	VERIFY(pthread_mutex_init(&chan_m_, 0) == 0);
+	VERIFY(pthread_cond_init(&destroy_wait_c_, 0) == 0);
 
 	if(retrans){
 		set_rand_seed();
@@ -137,9 +138,9 @@ rpcc::~rpcc()
 		chan_->closeconn();
 		chan_->decref();
 	}
-	assert(calls_.size() == 0);
-	assert(pthread_mutex_destroy(&m_) == 0);
-	assert(pthread_mutex_destroy(&chan_m_) == 0);
+	VERIFY(calls_.size() == 0);
+	VERIFY(pthread_mutex_destroy(&m_) == 0);
+	VERIFY(pthread_mutex_destroy(&chan_m_) == 0);
 }
 
 int
@@ -173,13 +174,13 @@ rpcc::cancel(void)
       ScopedLock cl(&ca->m);
       ca->done = true;
       ca->intret = rpc_const::cancel_failure;
-      assert(pthread_cond_signal(&ca->c) == 0);
+      VERIFY(pthread_cond_signal(&ca->c) == 0);
     }
   }
 
   while (calls_.size () > 0){
     destroy_wait_ = true;
-    assert(pthread_cond_wait(&destroy_wait_c_,&m_) == 0);
+    VERIFY(pthread_cond_wait(&destroy_wait_c_,&m_) == 0);
   }
   printf("rpcc::cancel: done\n");
 }
@@ -190,6 +191,7 @@ rpcc::call1(unsigned int proc, marshall &req, unmarshall &rep,
 {
 
 	caller ca(0, &rep);
+        int xid_rep;
 	{
 		ScopedLock ml(&m_);
 
@@ -209,6 +211,7 @@ rpcc::call1(unsigned int proc, marshall &req, unmarshall &rep,
 		req_header h(ca.xid, proc, clt_nonce_, srv_nonce_,
                              xid_rep_window_.front());
 		req.pack_req_header(h);
+                xid_rep = xid_rep_window_.front();
 	}
 
 	TO curr_to;
@@ -225,7 +228,19 @@ rpcc::call1(unsigned int proc, marshall &req, unmarshall &rep,
 		if(transmit){
 			get_refconn(&ch);
 			if(ch){
-			        if(reachable_) ch->send(req.cstr(), req.size());
+			        if(reachable_) {
+                                        request forgot;
+                                        {
+                                                ScopedLock ml(&m_);
+                                                if (dup_req_.isvalid() && xid_rep_done_ > dup_req_.xid) {
+                                                        forgot = dup_req_;
+                                                        dup_req_.clear();
+                                                }
+                                        }
+                                        if (forgot.isvalid()) 
+                                                ch->send((char *)forgot.buf.c_str(), forgot.buf.size());
+                                        ch->send(req.cstr(), req.size());
+                                }
 				else jsl_log(JSL_DBG_1, "not reachable\n");
 				jsl_log(JSL_DBG_2, 
 						"rpcc::call1 %u just sent req proc %x xid %u clt_nonce %d\n", 
@@ -278,9 +293,20 @@ rpcc::call1(unsigned int proc, marshall &req, unmarshall &rep,
 		update_xid_rep(ca.xid);
 
 		if(destroy_wait_){
-		  assert(pthread_cond_signal(&destroy_wait_c_) == 0);
+		  VERIFY(pthread_cond_signal(&destroy_wait_c_) == 0);
 		}
 	}
+
+        if (ca.done && lossytest_)
+        {
+                ScopedLock ml(&m_);
+                if (!dup_req_.isvalid()) {
+                        dup_req_.buf.assign(req.cstr(), req.size());
+                        dup_req_.xid = ca.xid;
+                }
+                if (xid_rep > xid_rep_done_)
+                        xid_rep_done_ = xid_rep;
+        }
 
 	ScopedLock cal(&ca.m);
 
@@ -291,6 +317,7 @@ rpcc::call1(unsigned int proc, marshall &req, unmarshall &rep,
 
 	if(ch)
 		ch->decref();
+
 	// destruction of req automatically frees its buffer
 	return (ca.done? ca.intret : rpc_const::timeout_failure);
 }
@@ -350,7 +377,7 @@ rpcc::got_pdu(connection *c, char *b, int sz)
 		}
 		ca->done = 1;
 	}
-	assert(pthread_cond_broadcast(&ca->c) == 0);
+	VERIFY(pthread_cond_broadcast(&ca->c) == 0);
 	return true;
 }
 
@@ -384,10 +411,10 @@ compress:
 rpcs::rpcs(unsigned int p1, int count)
   : port_(p1), counting_(count), curr_counts_(count), lossytest_(0), reachable_ (true)
 {
-	assert(pthread_mutex_init(&procs_m_, 0) == 0);
-	assert(pthread_mutex_init(&count_m_, 0) == 0);
-	assert(pthread_mutex_init(&reply_window_m_, 0) == 0);
-	assert(pthread_mutex_init(&conss_m_, 0) == 0);
+	VERIFY(pthread_mutex_init(&procs_m_, 0) == 0);
+	VERIFY(pthread_mutex_init(&count_m_, 0) == 0);
+	VERIFY(pthread_mutex_init(&reply_window_m_, 0) == 0);
+	VERIFY(pthread_mutex_init(&conss_m_, 0) == 0);
 
 	set_rand_seed();
 	nonce_ = random();
@@ -399,7 +426,7 @@ rpcs::rpcs(unsigned int p1, int count)
 	}
 
 	reg(rpc_const::bind, this, &rpcs::rpcbind);
-	dispatchpool_ = new ThrPool(10,false);
+	dispatchpool_ = new ThrPool(6,false);
 
 	listener_ = new tcpsconn(this, port_, lossytest_);
 }
@@ -434,9 +461,9 @@ void
 rpcs::reg1(unsigned int proc, handler *h)
 {
 	ScopedLock pl(&procs_m_);
-	assert(procs_.count(proc) == 0);
+	VERIFY(procs_.count(proc) == 0);
 	procs_[proc] = h;
-	assert(procs_.count(proc) >= 1);
+	VERIFY(procs_.count(proc) >= 1);
 }
 
 void
@@ -449,7 +476,7 @@ rpcs::updatestat(unsigned int proc)
 		std::map<int, int>::iterator i;
 		printf("RPC STATS: ");
 		for (i = counts_.begin(); i != counts_.end(); i++){
-			printf("%x %d ", i->first, i->second);
+			printf("%x:%d ", i->first, i->second);
 		}
 		printf("\n");
 
@@ -508,9 +535,10 @@ rpcs::dispatch(djob_t *j)
 	{
 		ScopedLock pl(&procs_m_);
 		if(procs_.count(proc) < 1){
-			jsl_log(JSL_DBG_2, "rpcs::dispatch: bad proc %x procs.count %u\n",
-					proc, (unsigned)procs_.count(proc));
+			fprintf(stderr, "rpcs::dispatch: unknown proc %x.\n",
+				proc);
 			c->decref();
+                        VERIFY(0);
 			return;
 		}
 
@@ -527,7 +555,7 @@ rpcs::dispatch(djob_t *j)
 			ScopedLock rwl(&reply_window_m_);
 			// if we don't know about this clt_nonce, create a cleanup object
 			if(reply_window_.find(h.clt_nonce) == reply_window_.end()){
-				assert (reply_window_[h.clt_nonce].size() == 0); // create
+				VERIFY (reply_window_[h.clt_nonce].size() == 0); // create
 				jsl_log(JSL_DBG_2,
 						"rpcs::dispatch: new client %u xid %d chan %d, total clients %d\n", 
 						h.clt_nonce, h.xid, c->channo(), (int)reply_window_.size());
@@ -561,8 +589,14 @@ rpcs::dispatch(djob_t *j)
 			}
 
 			rh.ret = f->fn(req, rep);
-			assert(rh.ret >= 0 || 
-				rh.ret == rpc_const::unmarshal_args_failure);
+                        if (rh.ret == rpc_const::unmarshal_args_failure) {
+                                fprintf(stderr, "rpcs::dispatch: failed to"
+                                       " unmarshall the arguments. You are"
+                                       " probably calling RPC 0x%x with wrong"
+                                       " types of arguments.\n", proc);
+                                VERIFY(0);
+                        }
+			VERIFY(rh.ret >= 0);
 
 			rep.pack_reply_header(rh);
 			rep.take_buf(&b1,&sz1);
@@ -609,8 +643,14 @@ rpcs::dispatch(djob_t *j)
 }
 
 // rpcs::dispatch calls this when an RPC request arrives.
+//
 // checks to see if an RPC with xid from clt_nonce has already been received.
-// if not, remembers the request.
+// if not, remembers the request in reply_window_.
+//
+// deletes remembered requests with XIDs <= xid_rep; the client
+// says it has received a reply for every RPC up through xid_rep.
+// frees the reply_t::buf of each such request.
+//
 // returns one of:
 //   NEW: never seen this xid before.
 //   INPROGRESS: seen this xid, and still processing it.
@@ -622,8 +662,70 @@ rpcs::checkduplicate_and_update(unsigned int clt_nonce, unsigned int xid,
 {
 	ScopedLock rwl(&reply_window_m_);
 
-        // You fill this in for Lab 1.
-	return NEW;
+  rpcs::rpcstate_t rv;
+  bool found_reply = false;
+  std::list<reply_t>::iterator reply;
+  std::map<unsigned int, std::list<reply_t> >::iterator client_window =
+      reply_window_.find(clt_nonce);
+
+  if (client_window != reply_window_.end()) {
+    for (reply = client_window->second.begin();
+        reply != client_window->second.end(); ++reply) {
+      if (reply->xid == xid) {
+        found_reply = true;
+        break;
+      }
+    }
+  }
+
+  if (found_reply) {
+    if (reply->cb_present) {
+      *b = reply->buf;
+      *sz = reply->sz;
+      rv = DONE;
+    } else {
+      rv = INPROGRESS;
+    }
+  } else {
+    std::map<unsigned int, unsigned int>::iterator highest_xid_rep =
+        highest_xid_rep_.find(clt_nonce);
+
+    if (highest_xid_rep != highest_xid_rep_.end()
+        && highest_xid_rep->second >= xid) {
+      rv = FORGOTTEN;
+    } else {
+      if (client_window == reply_window_.end()) {
+        client_window = reply_window_.insert(std::make_pair(clt_nonce,
+            std::list<reply_t>())).first;
+      }
+      client_window->second.push_back(reply_t(xid));
+
+      if (highest_xid_rep != highest_xid_rep_.end()) {
+        if (xid_rep > highest_xid_rep->second) {
+          highest_xid_rep->second = xid_rep;
+        }
+      } else {
+        highest_xid_rep = highest_xid_rep_.insert(
+            std::make_pair(clt_nonce, xid_rep)).first;
+      }
+
+      for (std::list<reply_t>::iterator iter = client_window->second.begin();
+          iter != client_window->second.end(); ) {
+        if (iter->xid <= highest_xid_rep->second) {
+          std::list<reply_t>::iterator to_remove = iter;
+          ++iter;
+          free(to_remove->buf);
+          client_window->second.erase(to_remove);
+        } else {
+          ++iter;
+        }
+      }
+
+      rv = NEW;
+    }
+  }
+
+  return rv;
 }
 
 // rpcs::dispatch calls add_reply when it is sending a reply to an RPC,
@@ -636,7 +738,16 @@ rpcs::add_reply(unsigned int clt_nonce, unsigned int xid,
 		char *b, int sz)
 {
 	ScopedLock rwl(&reply_window_m_);
-        // You fill this in for Lab 1.
+  std::map<unsigned int, std::list<reply_t> >::iterator window =
+      reply_window_.find(clt_nonce);
+  for (std::list<reply_t>::iterator iter = window->second.begin();
+      iter != window->second.end(); ++iter) {
+    if (iter->xid == xid) {
+      iter->buf = b;
+      iter->sz = sz;
+      iter->cb_present = true;
+    }
+  }
 }
 
 void
@@ -669,9 +780,9 @@ marshall::rawbyte(unsigned char x)
 {
 	if(_ind >= _capa){
 		_capa *= 2;
-		assert (_buf != NULL);
+		VERIFY (_buf != NULL);
 		_buf = (char *)realloc(_buf, _capa);
-		assert(_buf);
+		VERIFY(_buf);
 	}
 	_buf[_ind++] = x;
 }
@@ -681,9 +792,9 @@ marshall::rawbytes(const char *p, int n)
 {
 	if((_ind+n) > _capa){
 		_capa = _capa > n? 2*_capa:(_capa+n);
-		assert (_buf != NULL);
+		VERIFY (_buf != NULL);
 		_buf = (char *)realloc(_buf, _capa);
-		assert(_buf);
+		VERIFY(_buf);
 	}
 	memcpy(_buf+_ind, p, n);
 	_ind += n;
@@ -896,7 +1007,7 @@ unmarshall::rawbytes(std::string &ss, unsigned int n)
 	} else {
 		std::string tmps = std::string(_buf+_ind, n);
 		swap(ss, tmps);
-		assert(ss.size() == n);
+		VERIFY(ss.size() == n);
 		_ind += n;
 	}
 }
@@ -972,7 +1083,7 @@ add_timespec(const struct timespec &a, int b, struct timespec *result)
 	// convert to millisec, add timeout, convert back
 	result->tv_sec = a.tv_sec + b/1000;
 	result->tv_nsec = a.tv_nsec + (b % 1000) * 1000000;
-	assert(result->tv_nsec >= 0);
+	VERIFY(result->tv_nsec >= 0);
 	while (result->tv_nsec > 1000000000){
 		result->tv_sec++;
 		result->tv_nsec-=1000000000;
@@ -983,7 +1094,7 @@ int
 diff_timespec(const struct timespec &end, const struct timespec &start)
 {
 	int diff = (end.tv_sec > start.tv_sec)?(end.tv_sec-start.tv_sec)*1000:0;
-	assert(diff || end.tv_sec == start.tv_sec);
+	VERIFY(diff || end.tv_sec == start.tv_sec);
 	if(end.tv_nsec > start.tv_nsec){
 		diff += (end.tv_nsec-start.tv_nsec)/1000000;
 	} else {
