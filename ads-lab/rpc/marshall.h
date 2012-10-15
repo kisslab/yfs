@@ -8,8 +8,6 @@
 #include <map>
 #include <stdlib.h>
 #include <string.h>
-#include <cstddef>
-#include <inttypes.h>
 #include "lang/verify.h"
 #include "lang/algorithm.h"
 

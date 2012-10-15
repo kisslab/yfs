@@ -8,5 +8,5 @@ fi
 no=$1
 
 git archive --format=tar --prefix=$no/ HEAD | gzip >$no.tar.gz
-echo "Please send $no.tar.gz to ftp://public.sjtu.edu.cn"
+echo "Please send $no.tar.gz to aos.ppi.fudan@gmail.com"
 

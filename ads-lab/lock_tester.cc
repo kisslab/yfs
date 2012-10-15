@@ -171,6 +171,7 @@ main(int argc, char *argv[])
     }
 
     VERIFY(pthread_mutex_init(&count_mutex, NULL) == 0);
+
     printf("simple lock client\n");
     for (int i = 0; i < nt; i++) lc[i] = new lock_client(dst);
 

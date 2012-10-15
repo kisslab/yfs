@@ -1,4 +1,4 @@
-LAB=1
+LAB=2
 SOL=0
 RPC=./rpc
 LAB2GE=$(shell expr $(LAB) \>\= 2)
@@ -75,7 +75,11 @@ lock_tester : $(patsubst %.cc,%.o,$(lock_tester)) rpc/librpc.a
 
 lock_server=lock_server.cc lock_smain.cc
 ifeq ($(LAB4GE),1)
+<<<<<<< HEAD
+lock_server+=lock_server_cache.cc handle.cc
+=======
   lock_server+=lock_server_cache.cc handle.cc
+>>>>>>> lab1
 endif
 ifeq ($(LAB6GE),1)
   lock_server+= $(rsm_files)

@@ -297,16 +297,16 @@ rpcc::call1(unsigned int proc, marshall &req, unmarshall &rep,
 		}
 	}
 
-        if (ca.done && lossytest_)
-        {
-                ScopedLock ml(&m_);
-                if (!dup_req_.isvalid()) {
-                        dup_req_.buf.assign(req.cstr(), req.size());
-                        dup_req_.xid = ca.xid;
-                }
-                if (xid_rep > xid_rep_done_)
-                        xid_rep_done_ = xid_rep;
-        }
+  if (ca.done && lossytest_)
+  {
+    ScopedLock ml(&m_);
+    if (!dup_req_.isvalid()) {
+      dup_req_.buf.assign(req.cstr(), req.size());
+      dup_req_.xid = ca.xid;
+    }
+    if (xid_rep > xid_rep_done_)
+      xid_rep_done_ = xid_rep;
+  }
 
 	ScopedLock cal(&ca.m);
 
@@ -589,13 +589,13 @@ rpcs::dispatch(djob_t *j)
 			}
 
 			rh.ret = f->fn(req, rep);
-                        if (rh.ret == rpc_const::unmarshal_args_failure) {
+      if (rh.ret == rpc_const::unmarshal_args_failure) {
                                 fprintf(stderr, "rpcs::dispatch: failed to"
                                        " unmarshall the arguments. You are"
                                        " probably calling RPC 0x%x with wrong"
                                        " types of arguments.\n", proc);
                                 VERIFY(0);
-                        }
+      }
 			VERIFY(rh.ret >= 0);
 
 			rep.pack_reply_header(rh);
