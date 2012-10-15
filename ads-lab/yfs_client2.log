@@ -9,16 +9,21 @@ max_readahead=0x00020000
    max_write=0x00020000
    unique: 1, success, outsize: 40
 unique: 2, opcode: LOOKUP (1), nodeid: 1, insize: 47
+ [ ZZ ] parent 1 name '.Trash'
    unique: 2, error: -2 (No such file or directory), outsize: 16
 unique: 3, opcode: OPENDIR (27), nodeid: 1, insize: 48
    unique: 3, success, outsize: 32
 unique: 4, opcode: LOOKUP (1), nodeid: 1, insize: 52
+ [ ZZ ] parent 1 name '.Trash-1000'
    unique: 4, error: -2 (No such file or directory), outsize: 16
 unique: 5, opcode: LOOKUP (1), nodeid: 1, insize: 45
+ [ ZZ ] parent 1 name 'BDMV'
    unique: 5, error: -2 (No such file or directory), outsize: 16
 unique: 6, opcode: LOOKUP (1), nodeid: 1, insize: 57
+ [ ZZ ] parent 1 name '.xdg-volume-info'
    unique: 6, error: -2 (No such file or directory), outsize: 16
 unique: 7, opcode: LOOKUP (1), nodeid: 1, insize: 52
+ [ ZZ ] parent 1 name 'autorun.inf'
    unique: 7, error: -2 (No such file or directory), outsize: 16
 unique: 8, opcode: READDIR (28), nodeid: 1, insize: 80
 fuseserver_readdir
@@ -152,14 +157,108 @@ fuseserver_readdir
 unique: 63, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
    unique: 63, success, outsize: 16
 unique: 64, opcode: LOOKUP (1), nodeid: 1, insize: 52
+ [ ZZ ] parent 1 name 'autorun.inf'
    unique: 64, error: -2 (No such file or directory), outsize: 16
-unique: 65, opcode: GETATTR (3), nodeid: 1, insize: 56
+unique: 65, opcode: LOOKUP (1), nodeid: 1, insize: 47
+ [ ZZ ] parent 1 name 'a31682'
+getattr 000000008020c6a5 1
+getfile 000000008020c6a5
+getfile 000000008020c6a5 -> sz 65553
+   getattr -> 65553
+   unique: 65, success, outsize: 144
+unique: 66, opcode: OPEN (14), nodeid: 2149631653, insize: 48
+   unique: 66, success, outsize: 32
+unique: 67, opcode: IOCTL (39), nodeid: 2149631653, insize: 72
+   unique: 67, error: -38 (Function not implemented), outsize: 16
+unique: 68, opcode: GETATTR (3), nodeid: 2149631653, insize: 56
+getattr 000000008020c6a5 1
+getfile 000000008020c6a5
+getfile 000000008020c6a5 -> sz 65553
+   getattr -> 65553
+   unique: 68, success, outsize: 120
+unique: 69, opcode: READ (15), nodeid: 2149631653, insize: 80
+   unique: 69, success, outsize: 16400
+unique: 70, opcode: READ (15), nodeid: 2149631653, insize: 80
+   unique: 70, success, outsize: 32784
+unique: 71, opcode: READ (15), nodeid: 2149631653, insize: 80
+   unique: 71, success, outsize: 20496
+unique: 72, opcode: GETATTR (3), nodeid: 2149631653, insize: 56
+getattr 000000008020c6a5 1
+getfile 000000008020c6a5
+getfile 000000008020c6a5 -> sz 65553
+   getattr -> 65553
+   unique: 72, success, outsize: 120
+unique: 73, opcode: GETATTR (3), nodeid: 2149631653, insize: 56
+getattr 000000008020c6a5 1
+getfile 000000008020c6a5
+getfile 000000008020c6a5 -> sz 65553
+   getattr -> 65553
+   unique: 73, success, outsize: 120
+unique: 74, opcode: FLUSH (25), nodeid: 2149631653, insize: 64
+   unique: 74, error: -38 (Function not implemented), outsize: 16
+unique: 75, opcode: RELEASE (18), nodeid: 2149631653, insize: 64
+   unique: 75, success, outsize: 16
+unique: 76, opcode: LOOKUP (1), nodeid: 1, insize: 47
+ [ ZZ ] parent 1 name 'b31682'
+getattr 00000000c8aa9eb2 1
+getfile 00000000c8aa9eb2
+getfile 00000000c8aa9eb2 -> sz 4111
+   getattr -> 4111
+   unique: 76, success, outsize: 144
+unique: 77, opcode: OPEN (14), nodeid: 3366624946, insize: 48
+   unique: 77, success, outsize: 32
+unique: 78, opcode: IOCTL (39), nodeid: 3366624946, insize: 72
+   unique: 78, error: -38 (Function not implemented), outsize: 16
+unique: 79, opcode: GETATTR (3), nodeid: 3366624946, insize: 56
+getattr 00000000c8aa9eb2 1
+getfile 00000000c8aa9eb2
+getfile 00000000c8aa9eb2 -> sz 4111
+   getattr -> 4111
+   unique: 79, success, outsize: 120
+unique: 80, opcode: READ (15), nodeid: 3366624946, insize: 80
+   unique: 80, success, outsize: 8208
+unique: 81, opcode: GETATTR (3), nodeid: 3366624946, insize: 56
+getattr 00000000c8aa9eb2 1
+getfile 00000000c8aa9eb2
+getfile 00000000c8aa9eb2 -> sz 4111
+   getattr -> 4111
+   unique: 81, success, outsize: 120
+unique: 82, opcode: GETATTR (3), nodeid: 3366624946, insize: 56
+getattr 00000000c8aa9eb2 1
+getfile 00000000c8aa9eb2
+getfile 00000000c8aa9eb2 -> sz 4111
+   getattr -> 4111
+   unique: 82, success, outsize: 120
+unique: 83, opcode: RELEASE (18), nodeid: 3366624946, insize: 64
+   unique: 83, success, outsize: 16
+unique: 84, opcode: OPENDIR (27), nodeid: 1, insize: 48
+   unique: 84, success, outsize: 32
+unique: 85, opcode: READDIR (28), nodeid: 1, insize: 80
+fuseserver_readdir
+   unique: 85, success, outsize: 4112
+unique: 86, opcode: READDIR (28), nodeid: 1, insize: 80
+fuseserver_readdir
+   unique: 86, success, outsize: 4112
+unique: 87, opcode: READDIR (28), nodeid: 1, insize: 80
+fuseserver_readdir
+   unique: 87, success, outsize: 4112
+unique: 88, opcode: READDIR (28), nodeid: 1, insize: 80
+fuseserver_readdir
+   unique: 88, success, outsize: 4112
+unique: 89, opcode: READDIR (28), nodeid: 1, insize: 80
+fuseserver_readdir
+   unique: 89, success, outsize: 4080
+unique: 90, opcode: READDIR (28), nodeid: 1, insize: 80
+fuseserver_readdir
+   unique: 90, success, outsize: 16
+unique: 91, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+   unique: 91, success, outsize: 16
+unique: 92, opcode: GETATTR (3), nodeid: 1, insize: 56
 getattr 0000000000000001 0
 getdir 0000000000000001
-   getattr -> 0 0 0
-   unique: 65, success, outsize: 120
-unique: 66, opcode: GETATTR (3), nodeid: 1, insize: 56
-getattr 0000000000000001 0
-getdir 0000000000000001
-   getattr -> 0 0 0
-   unique: 66, success, outsize: 120
+   getattr -> 1350304297 1350304297 1350304297
+   unique: 92, success, outsize: 120
+unique: 93, opcode: ACCESS (34), nodeid: 1, insize: 48
+   unique: 93, error: -38 (Function not implemented), outsize: 16
+unique: 94, opcode: FORGET (2), nodeid: 3366624946, insize: 48
+unique: 95, opcode: FORGET (2), nodeid: 2149631653, insize: 48
