@@ -1,264 +1,279 @@
-FUSE library version: 2.8.4
-unique: 1, opcode: INIT (26), nodeid: 0, insize: 56
+FUSE library version: 2.9.1
+unique: 1, opcode: INIT (26), nodeid: 0, insize: 56, pid: 0
 INIT: 7.14
 flags=0x0000007b
 max_readahead=0x00020000
-   INIT: 7.12
+   INIT: 7.19
    flags=0x00000000
    max_readahead=0x00020000
    max_write=0x00020000
+   max_background=0
+   congestion_threshold=0
    unique: 1, success, outsize: 40
-unique: 2, opcode: LOOKUP (1), nodeid: 1, insize: 47
+unique: 2, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
+   unique: 2, success, outsize: 32
+unique: 3, opcode: LOOKUP (1), nodeid: 1, insize: 47, pid: 1857
  [ ZZ ] parent 1 name '.Trash'
-   unique: 2, error: -2 (No such file or directory), outsize: 16
-unique: 3, opcode: OPENDIR (27), nodeid: 1, insize: 48
-   unique: 3, success, outsize: 32
-unique: 4, opcode: LOOKUP (1), nodeid: 1, insize: 52
- [ ZZ ] parent 1 name '.Trash-1000'
-   unique: 4, error: -2 (No such file or directory), outsize: 16
-unique: 5, opcode: LOOKUP (1), nodeid: 1, insize: 45
+   unique: 3, error: -2 (No such file or directory), outsize: 16
+unique: 4, opcode: LOOKUP (1), nodeid: 1, insize: 45, pid: 10664
  [ ZZ ] parent 1 name 'BDMV'
-   unique: 5, error: -2 (No such file or directory), outsize: 16
-unique: 6, opcode: LOOKUP (1), nodeid: 1, insize: 57
+   unique: 4, error: -2 (No such file or directory), outsize: 16
+unique: 5, opcode: LOOKUP (1), nodeid: 1, insize: 57, pid: 10673
  [ ZZ ] parent 1 name '.xdg-volume-info'
-   unique: 6, error: -2 (No such file or directory), outsize: 16
-unique: 7, opcode: LOOKUP (1), nodeid: 1, insize: 52
+   unique: 5, error: -2 (No such file or directory), outsize: 16
+unique: 6, opcode: LOOKUP (1), nodeid: 1, insize: 52, pid: 10672
  [ ZZ ] parent 1 name 'autorun.inf'
-   unique: 7, error: -2 (No such file or directory), outsize: 16
-unique: 8, opcode: READDIR (28), nodeid: 1, insize: 80
+   unique: 6, error: -2 (No such file or directory), outsize: 16
+unique: 7, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
+   unique: 7, success, outsize: 16
+unique: 8, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 8, success, outsize: 16
-unique: 9, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
-   unique: 9, success, outsize: 16
-unique: 10, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 9, opcode: LOOKUP (1), nodeid: 1, insize: 52, pid: 1857
+ [ ZZ ] parent 1 name '.Trash-1000'
+   unique: 9, error: -2 (No such file or directory), outsize: 16
+unique: 10, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 10, success, outsize: 32
-unique: 11, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 11, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 11, success, outsize: 16
-unique: 12, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 12, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 12, success, outsize: 16
-unique: 13, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 13, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 13, success, outsize: 32
-unique: 14, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 14, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 14, success, outsize: 16
-unique: 15, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 15, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 15, success, outsize: 16
-unique: 16, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 16, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 16, success, outsize: 32
-unique: 17, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 17, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 17, success, outsize: 16
-unique: 18, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 18, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 18, success, outsize: 16
-unique: 19, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 19, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 19, success, outsize: 32
-unique: 20, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 20, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 20, success, outsize: 16
-unique: 21, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 21, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 21, success, outsize: 16
-unique: 22, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 22, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 22, success, outsize: 32
-unique: 23, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 23, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 23, success, outsize: 16
-unique: 24, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 24, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 24, success, outsize: 16
-unique: 25, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 25, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 25, success, outsize: 32
-unique: 26, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 26, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 26, success, outsize: 16
-unique: 27, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 27, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 27, success, outsize: 16
-unique: 28, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 28, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 28, success, outsize: 32
-unique: 29, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 29, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 29, success, outsize: 16
-unique: 30, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 30, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 30, success, outsize: 16
-unique: 31, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 31, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 31, success, outsize: 32
-unique: 32, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 32, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 32, success, outsize: 16
-unique: 33, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 33, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 33, success, outsize: 16
-unique: 34, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 34, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 34, success, outsize: 32
-unique: 35, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 35, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 35, success, outsize: 16
-unique: 36, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 36, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 36, success, outsize: 16
-unique: 37, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 37, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 37, success, outsize: 32
-unique: 38, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 38, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 38, success, outsize: 16
-unique: 39, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 39, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 39, success, outsize: 16
-unique: 40, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 40, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 40, success, outsize: 32
-unique: 41, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 41, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 41, success, outsize: 16
-unique: 42, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 42, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 42, success, outsize: 16
-unique: 43, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 43, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 43, success, outsize: 32
-unique: 44, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 44, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 44, success, outsize: 16
-unique: 45, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 45, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 45, success, outsize: 16
-unique: 46, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 46, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 46, success, outsize: 32
-unique: 47, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 47, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 47, success, outsize: 16
-unique: 48, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 48, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 48, success, outsize: 16
-unique: 49, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 49, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 49, success, outsize: 32
-unique: 50, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 50, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 50, success, outsize: 16
-unique: 51, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 51, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 51, success, outsize: 16
-unique: 52, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 52, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 52, success, outsize: 32
-unique: 53, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 53, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 53, success, outsize: 16
-unique: 54, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 54, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 54, success, outsize: 16
-unique: 55, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 55, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 55, success, outsize: 32
-unique: 56, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 56, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 56, success, outsize: 16
-unique: 57, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 57, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 57, success, outsize: 16
-unique: 58, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 58, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 1810
    unique: 58, success, outsize: 32
-unique: 59, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 59, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 1810
 fuseserver_readdir
    unique: 59, success, outsize: 16
-unique: 60, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 60, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 60, success, outsize: 16
-unique: 61, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 61, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 10664
    unique: 61, success, outsize: 32
-unique: 62, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 62, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 10673
 fuseserver_readdir
    unique: 62, success, outsize: 16
-unique: 63, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 63, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 63, success, outsize: 16
-unique: 64, opcode: LOOKUP (1), nodeid: 1, insize: 52
+unique: 64, opcode: LOOKUP (1), nodeid: 1, insize: 52, pid: 10672
  [ ZZ ] parent 1 name 'autorun.inf'
    unique: 64, error: -2 (No such file or directory), outsize: 16
-unique: 65, opcode: LOOKUP (1), nodeid: 1, insize: 47
- [ ZZ ] parent 1 name 'a31682'
-getattr 000000008020c6a5 1
-getfile 000000008020c6a5
-getfile 000000008020c6a5 -> sz 65553
+unique: 65, opcode: LOOKUP (1), nodeid: 1, insize: 47, pid: 10686
+ [ ZZ ] parent 1 name 'a10686'
+getattr 000000008ae07844 1
+getfile 000000008ae07844
+getfile 000000008ae07844 -> sz 65553
    getattr -> 65553
    unique: 65, success, outsize: 144
-unique: 66, opcode: OPEN (14), nodeid: 2149631653, insize: 48
+unique: 66, opcode: OPEN (14), nodeid: 2329966660, insize: 48, pid: 10686
    unique: 66, success, outsize: 32
-unique: 67, opcode: IOCTL (39), nodeid: 2149631653, insize: 72
+unique: 67, opcode: IOCTL (39), nodeid: 2329966660, insize: 72, pid: 10686
    unique: 67, error: -38 (Function not implemented), outsize: 16
-unique: 68, opcode: GETATTR (3), nodeid: 2149631653, insize: 56
-getattr 000000008020c6a5 1
-getfile 000000008020c6a5
-getfile 000000008020c6a5 -> sz 65553
+unique: 68, opcode: GETATTR (3), nodeid: 2329966660, insize: 56, pid: 10686
+getattr 000000008ae07844 1
+getfile 000000008ae07844
+getfile 000000008ae07844 -> sz 65553
    getattr -> 65553
    unique: 68, success, outsize: 120
-unique: 69, opcode: READ (15), nodeid: 2149631653, insize: 80
+unique: 69, opcode: READ (15), nodeid: 2329966660, insize: 80, pid: 10686
    unique: 69, success, outsize: 16400
-unique: 70, opcode: READ (15), nodeid: 2149631653, insize: 80
+unique: 70, opcode: READ (15), nodeid: 2329966660, insize: 80, pid: 10686
    unique: 70, success, outsize: 32784
-unique: 71, opcode: READ (15), nodeid: 2149631653, insize: 80
+unique: 71, opcode: READ (15), nodeid: 2329966660, insize: 80, pid: 10686
    unique: 71, success, outsize: 20496
-unique: 72, opcode: GETATTR (3), nodeid: 2149631653, insize: 56
-getattr 000000008020c6a5 1
-getfile 000000008020c6a5
-getfile 000000008020c6a5 -> sz 65553
+unique: 72, opcode: GETATTR (3), nodeid: 2329966660, insize: 56, pid: 10686
+getattr 000000008ae07844 1
+getfile 000000008ae07844
+getfile 000000008ae07844 -> sz 65553
    getattr -> 65553
    unique: 72, success, outsize: 120
-unique: 73, opcode: GETATTR (3), nodeid: 2149631653, insize: 56
-getattr 000000008020c6a5 1
-getfile 000000008020c6a5
-getfile 000000008020c6a5 -> sz 65553
+unique: 73, opcode: GETATTR (3), nodeid: 2329966660, insize: 56, pid: 10686
+getattr 000000008ae07844 1
+getfile 000000008ae07844
+getfile 000000008ae07844 -> sz 65553
    getattr -> 65553
    unique: 73, success, outsize: 120
-unique: 74, opcode: FLUSH (25), nodeid: 2149631653, insize: 64
+unique: 74, opcode: FLUSH (25), nodeid: 2329966660, insize: 64, pid: 10686
    unique: 74, error: -38 (Function not implemented), outsize: 16
-unique: 75, opcode: RELEASE (18), nodeid: 2149631653, insize: 64
+unique: 75, opcode: RELEASE (18), nodeid: 2329966660, insize: 64, pid: 0
    unique: 75, success, outsize: 16
-unique: 76, opcode: LOOKUP (1), nodeid: 1, insize: 47
- [ ZZ ] parent 1 name 'b31682'
-getattr 00000000c8aa9eb2 1
-getfile 00000000c8aa9eb2
-getfile 00000000c8aa9eb2 -> sz 4111
+unique: 76, opcode: LOOKUP (1), nodeid: 1, insize: 47, pid: 10686
+ [ ZZ ] parent 1 name 'b10686'
+getattr 00000000efae9a75 1
+getfile 00000000efae9a75
+getfile 00000000efae9a75 -> sz 4111
    getattr -> 4111
    unique: 76, success, outsize: 144
-unique: 77, opcode: OPEN (14), nodeid: 3366624946, insize: 48
+unique: 77, opcode: OPEN (14), nodeid: 4021197429, insize: 48, pid: 10686
    unique: 77, success, outsize: 32
-unique: 78, opcode: IOCTL (39), nodeid: 3366624946, insize: 72
+unique: 78, opcode: IOCTL (39), nodeid: 4021197429, insize: 72, pid: 10686
    unique: 78, error: -38 (Function not implemented), outsize: 16
-unique: 79, opcode: GETATTR (3), nodeid: 3366624946, insize: 56
-getattr 00000000c8aa9eb2 1
-getfile 00000000c8aa9eb2
-getfile 00000000c8aa9eb2 -> sz 4111
+unique: 79, opcode: GETATTR (3), nodeid: 4021197429, insize: 56, pid: 10686
+getattr 00000000efae9a75 1
+getfile 00000000efae9a75
+getfile 00000000efae9a75 -> sz 4111
    getattr -> 4111
    unique: 79, success, outsize: 120
-unique: 80, opcode: READ (15), nodeid: 3366624946, insize: 80
+unique: 80, opcode: READ (15), nodeid: 4021197429, insize: 80, pid: 10686
    unique: 80, success, outsize: 8208
-unique: 81, opcode: GETATTR (3), nodeid: 3366624946, insize: 56
-getattr 00000000c8aa9eb2 1
-getfile 00000000c8aa9eb2
-getfile 00000000c8aa9eb2 -> sz 4111
+unique: 81, opcode: GETATTR (3), nodeid: 4021197429, insize: 56, pid: 10686
+getattr 00000000efae9a75 1
+getfile 00000000efae9a75
+getfile 00000000efae9a75 -> sz 4111
    getattr -> 4111
    unique: 81, success, outsize: 120
-unique: 82, opcode: GETATTR (3), nodeid: 3366624946, insize: 56
-getattr 00000000c8aa9eb2 1
-getfile 00000000c8aa9eb2
-getfile 00000000c8aa9eb2 -> sz 4111
+unique: 82, opcode: GETATTR (3), nodeid: 4021197429, insize: 56, pid: 10686
+getattr 00000000efae9a75 1
+getfile 00000000efae9a75
+getfile 00000000efae9a75 -> sz 4111
    getattr -> 4111
    unique: 82, success, outsize: 120
-unique: 83, opcode: RELEASE (18), nodeid: 3366624946, insize: 64
+unique: 83, opcode: RELEASE (18), nodeid: 4021197429, insize: 64, pid: 0
    unique: 83, success, outsize: 16
-unique: 84, opcode: OPENDIR (27), nodeid: 1, insize: 48
+unique: 84, opcode: OPENDIR (27), nodeid: 1, insize: 48, pid: 10686
    unique: 84, success, outsize: 32
-unique: 85, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 85, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 10686
 fuseserver_readdir
    unique: 85, success, outsize: 4112
-unique: 86, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 86, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 10686
 fuseserver_readdir
    unique: 86, success, outsize: 4112
-unique: 87, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 87, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 10686
 fuseserver_readdir
    unique: 87, success, outsize: 4112
-unique: 88, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 88, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 10686
 fuseserver_readdir
    unique: 88, success, outsize: 4112
-unique: 89, opcode: READDIR (28), nodeid: 1, insize: 80
+unique: 89, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 10686
 fuseserver_readdir
-   unique: 89, success, outsize: 4080
-unique: 90, opcode: READDIR (28), nodeid: 1, insize: 80
+   unique: 89, success, outsize: 3600
+unique: 90, opcode: READDIR (28), nodeid: 1, insize: 80, pid: 10686
 fuseserver_readdir
    unique: 90, success, outsize: 16
-unique: 91, opcode: RELEASEDIR (29), nodeid: 1, insize: 64
+unique: 91, opcode: RELEASEDIR (29), nodeid: 1, insize: 64, pid: 0
    unique: 91, success, outsize: 16
-unique: 92, opcode: GETATTR (3), nodeid: 1, insize: 56
+unique: 92, opcode: GETATTR (3), nodeid: 1, insize: 56, pid: 10760
 getattr 0000000000000001 0
 getdir 0000000000000001
-   getattr -> 1350304297 1350304297 1350304297
+   getattr -> 1351062815 1351062815 1351062815
    unique: 92, success, outsize: 120
-unique: 93, opcode: ACCESS (34), nodeid: 1, insize: 48
-   unique: 93, error: -38 (Function not implemented), outsize: 16
-unique: 94, opcode: FORGET (2), nodeid: 3366624946, insize: 48
-unique: 95, opcode: FORGET (2), nodeid: 2149631653, insize: 48
+unique: 93, opcode: GETATTR (3), nodeid: 1, insize: 56, pid: 10769
+getattr 0000000000000001 0
+getdir 0000000000000001
+   getattr -> 1351062815 1351062815 1351062815
+   unique: 93, success, outsize: 120
+unique: 94, opcode: GETATTR (3), nodeid: 1, insize: 56, pid: 10470
+getattr 0000000000000001 0
+getdir 0000000000000001
+   getattr -> 1351062815 1351062815 1351062815
+   unique: 94, success, outsize: 120
+unique: 95, opcode: GETATTR (3), nodeid: 1, insize: 56, pid: 10886
+getattr 0000000000000001 0
+getdir 0000000000000001
+   getattr -> 1351062815 1351062815 1351062815
+   unique: 95, success, outsize: 120
+unique: 96, opcode: FORGET (2), nodeid: 2329966660, insize: 48, pid: 0
+unique: 97, opcode: FORGET (2), nodeid: 4021197429, insize: 48, pid: 0
