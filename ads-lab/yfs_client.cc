@@ -12,12 +12,11 @@
 #include <stdlib.h>
 #include "zdebug.h"
 
-
 yfs_client::yfs_client(std::string extent_dst, std::string lock_dst)
 {
-  ec = new extent_client(extent_dst);
-  lc = new lock_client(lock_dst);
-  srand(time(NULL) + getpid());
+    ec = new extent_client(extent_dst);
+    lc = new lock_client(lock_dst);
+    srand(time(NULL) + getpid());
 }
 
 yfs_client::inum yfs_client::rand_inum(bool isfile) {
@@ -28,11 +27,11 @@ yfs_client::inum yfs_client::rand_inum(bool isfile) {
 }
 
 void yfs_client::lock(inum ino) {
-  lc->acquire(ino);
+    lc->acquire(ino);
 }
 
 void yfs_client::unlock(inum ino) {
-  lc->release(ino);
+    lc->release(ino);
 }
 
 yfs_client::inum
@@ -137,27 +136,27 @@ int yfs_client::create(inum parent, const char * name, bool isfile, unsigned lon
         ScopedLockClient slc(lc, parent);
         int rs = get(parent, b);
         if (rs != OK) {
-			      ERR("get parent failed!\n");
+            ERR("get parent failed");
             return rs;
         }
         std::string t = "/" + std::string(name) + "/";
         if (b.find(t) != std::string::npos) {
-            ERR("create file exist!\n");
+            ERR("create file exist ");
             return EXIST;
         }
-        inum num = rand_inum();
+        inum num = rand_inum(isfile);
         ino = (unsigned long)(num & 0xffffffff);
         b = b.append(filename(num) + t);
         rs = put(num, "");
         if (rs != OK) {
-			    ERR("create file, put operation failed!");
-			    return rs;
-		    }
+            ERR("create file, put operation failed");
+            return rs;
+        }
         rs = put(parent, b);
         if (rs != OK) {
-			    ERR("update parent failed!");
-			    return rs;
-		    }
+            ERR("update parent failed");
+            return rs;
+        }
         return OK;
     }
     return NOENT;
@@ -171,6 +170,7 @@ bool yfs_client::lookup(inum parent, const char *name, unsigned long &ino) {
         std::string b;
         int rs = get(parent, b);
         if (rs != OK) {
+            ERR("look up parent failed");
             return false;
         }
         std::string t = "/" + std::string(name) + "/";
@@ -239,21 +239,23 @@ int yfs_client::write(inum ino, const char * buf, size_t size, off_t off) {
 
 int yfs_client::setattr(inum fileno, struct stat *attr) {
     std::string buf;
+    ScopedLockClient slc(lc, fileno);
     int rs = get(fileno, buf);
     if (rs != OK) {
         return rs;
     }
     unsigned int sz = buf.size();
     if (sz < attr->st_size) {
-        char * a = new char[attr->st_size - sz];
-        buf.append(std::string(a));
+        int appendSz = attr->st_size - sz;
+        char * a = new char[appendSz];
+        bzero(a, appendSz);
+        buf.append(std::string(a, appendSz));
     } else {
         buf = buf.substr(0, attr->st_size);
     }
     rs = put(fileno, buf);
     return rs;
 }
-
 
 int yfs_client::unlink(inum parent, const char *name) {
     Z("unlink parent %lld name '%s'\n", parent, name);
@@ -308,3 +310,4 @@ int yfs_client::unlink(inum parent, const char *name) {
     }
     return NOENT;
 }
+
