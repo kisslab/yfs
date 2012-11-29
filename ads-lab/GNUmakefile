@@ -1,4 +1,4 @@
-LAB=3
+LAB=5
 SOL=0
 RPC=./rpc
 LAB2GE=$(shell expr $(LAB) \>\= 2)
@@ -7,25 +7,25 @@ LAB4GE=$(shell expr $(LAB) \>\= 4)
 LAB5GE=$(shell expr $(LAB) \>\= 5)
 LAB6GE=$(shell expr $(LAB) \>\= 6)
 LAB7GE=$(shell expr $(LAB) \>\= 7)
-CXXFLAGS =  -g -MMD -Wall -I. -I$(RPC) -DLAB=$(LAB) -DSOL=$(SOL) -D_FILE_OFFSET_BITS=64
+CXXFLAGS =  -g -MD -Wall -I. -I$(RPC) -DLAB=$(LAB) -DSOL=$(SOL) -D_FILE_OFFSET_BITS=64
 FUSEFLAGS= -D_FILE_OFFSET_BITS=64 -DFUSE_USE_VERSION=25 -I/usr/local/include/fuse -I/usr/include/fuse
 ifeq ($(shell uname -s),Darwin)
-  MACFLAGS= -D__FreeBSD__=10
+MACFLAGS= -D__FreeBSD__=10
 else
-  MACFLAGS=
+MACFLAGS=
 endif
 LDFLAGS = -L. -L/usr/local/lib
 LDLIBS = -lpthread 
 ifeq ($(LAB2GE),1)
-  ifeq ($(shell uname -s),Darwin)
-    ifeq ($(shell sw_vers -productVersion | sed -e "s/.*\(10\.[0-9]\).*/\1/"),10.6)
-      LDLIBS += -lfuse_ino64
-    else
-      LDLIBS += -lfuse
-    endif
-  else
-    LDLIBS += -lfuse
-  endif
+ifeq ($(shell uname -s),Darwin)
+ifeq ($(shell sw_vers -productVersion | sed -e "s/.*\(10\.[0-9]\).*/\1/"),10.6)
+LDLIBS += -lfuse_ino64
+else
+LDLIBS += -lfuse
+endif
+else
+LDLIBS += -lfuse
+endif
 endif
 LDLIBS += $(shell test -f `gcc -print-file-name=librt.so` && echo -lrt)
 LDLIBS += $(shell test -f `gcc -print-file-name=libdl.so` && echo -ldl)
@@ -66,39 +66,31 @@ lock_demo : $(patsubst %.cc,%.o,$(lock_demo)) rpc/librpc.a
 
 lock_tester=lock_tester.cc lock_client.cc
 ifeq ($(LAB4GE),1)
-  lock_tester += lock_client_cache.cc
+lock_tester += lock_client_cache.cc
 endif
 ifeq ($(LAB7GE),1)
-  lock_tester+=rsm_client.cc handle.cc lock_client_cache_rsm.cc
+lock_tester+=rsm_client.cc handle.cc
 endif
 lock_tester : $(patsubst %.cc,%.o,$(lock_tester)) rpc/librpc.a
 
 lock_server=lock_server.cc lock_smain.cc
 ifeq ($(LAB4GE),1)
-<<<<<<< HEAD
 lock_server+=lock_server_cache.cc handle.cc
-=======
-  lock_server+=lock_server_cache.cc handle.cc
->>>>>>> lab1
 endif
 ifeq ($(LAB6GE),1)
-  lock_server+= $(rsm_files)
+lock_server+= $(rsm_files)
 endif
-ifeq ($(LAB7GE),1)
-  lock_server+= lock_server_cache_rsm.cc
-endif
-
 lock_server : $(patsubst %.cc,%.o,$(lock_server)) rpc/librpc.a
 
 yfs_client=yfs_client.cc extent_client.cc fuse.cc
 ifeq ($(LAB3GE),1)
-  yfs_client += lock_client.cc
+yfs_client += lock_client.cc
 endif
 ifeq ($(LAB7GE),1)
-  yfs_client += rsm_client.cc lock_client_cache_rsm.cc
+yfs_client += rsm_client.cc
 endif
 ifeq ($(LAB4GE),1)
-  yfs_client += lock_client_cache.cc
+yfs_client += lock_client_cache.cc
 endif
 yfs_client : $(patsubst %.cc,%.o,$(yfs_client)) rpc/librpc.a
 
@@ -112,7 +104,7 @@ test-lab-3-c=test-lab-3-c.c
 test-lab-4-c:  $(patsubst %.c,%.o,$(test_lab_4-c)) rpc/librpc.a
 
 rsm_tester=rsm_tester.cc rsmtest_client.cc
-rsm_tester:  $(patsubst %.cc,%.o,$(rsm_tester)) rpc/librpc.a
+rsm_tester:  $(patsubst %.c,%.o,$(rsm_tester)) rpc/librpc.a
 
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -124,18 +116,7 @@ fuse.o: fuse.cc
 -include mklab.inc
 
 -include *.d
--include rpc/*.d
 
-clean_files=rpc/rpctest rpc/*.o rpc/*.d rpc/librpc.a *.o *.d yfs_client extent_server lock_server lock_tester lock_demo rpctest test-lab-3-b test-lab-3-c rsm_tester
-.PHONY: clean handin
-clean: 
-	rm $(clean_files) -rf 
-
-handin_ignore=$(clean_files) core* *log
-handin_file=$(shell whoami)-lab$(LAB).tgz
-labdir=$(shell basename $(PWD))
-handin: 
-	@if test -f stop.sh; then ./stop.sh > /dev/null 2>&1 | echo ""; fi
-	@bash -c "cd ../; tar -X <(tr ' ' '\n' < <(echo '$(handin_ignore)')) -czvf $(handin_file) $(labdir); mv $(handin_file) $(labdir); cd $(labdir)"
-	@echo Please email $(handin_file) to 6.824-submit@pdos.csail.mit.edu
-	@echo Thanks!
+.PHONY : clean
+clean : 
+	rm -rf rpc/rpctest rpc/*.o rpc/*.d rpc/librpc.a *.o *.d yfs_client extent_server lock_server lock_tester lock_demo rpctest test-lab-3-b test-lab-3-c rsm_tester

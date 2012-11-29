@@ -82,16 +82,15 @@ fuseserver_getattr(fuse_req_t req, fuse_ino_t ino,
 void
 fuseserver_setattr(fuse_req_t req, fuse_ino_t ino, struct stat *attr, int to_set, struct fuse_file_info *fi)
 {
-  printf("fuseserver_setattr 0x%x\n", to_set);
   if (FUSE_SET_ATTR_SIZE & to_set) {
     struct stat st;
     // You fill this in for Lab 2
     int rs = yfs->setattr(ino, attr);
     getattr(ino, st);
     if (rs == yfs_client::OK) {
-      fuse_reply_attr(req, &st, 0);
+        fuse_reply_attr(req, &st, 0);
     } else {
-      fuse_reply_err(req, ENOSYS);
+        fuse_reply_err(req, ENOSYS);
     }
   } else {
     fuse_reply_err(req, ENOSYS);
@@ -100,16 +99,16 @@ fuseserver_setattr(fuse_req_t req, fuse_ino_t ino, struct stat *attr, int to_set
 
 void
 fuseserver_read(fuse_req_t req, fuse_ino_t ino, size_t size,
-    off_t off, struct fuse_file_info *fi)
+      off_t off, struct fuse_file_info *fi)
 {
   // You fill this in for Lab 2
-  std::string buf;
-  int rs = yfs->read(ino, size, off, buf);
-  if (rs == yfs_client::OK) {
-    fuse_reply_buf(req, buf.c_str(), size);
-  } else {
-      fuse_reply_err(req, ENOSYS);
-  }
+    std::string buf;
+    int rs = yfs->read(ino, size, off, buf);
+    if (rs == yfs_client::OK) {
+        fuse_reply_buf(req, buf.c_str(), buf.size());
+    } else {
+        fuse_reply_err(req, ENOSYS);
+    }
 }
 
 void
@@ -120,9 +119,9 @@ fuseserver_write(fuse_req_t req, fuse_ino_t ino,
   // You fill this in for Lab 2
   int rs = yfs->write(ino, buf, size, off);
   if (rs == yfs_client::OK) {
-    fuse_reply_write(req, size);
+      fuse_reply_write(req, size);
   } else {
-    fuse_reply_err(req, ENOSYS);
+      fuse_reply_err(req, ENOSYS);
   }
 }
 
@@ -192,9 +191,9 @@ fuseserver_lookup(fuse_req_t req, fuse_ino_t parent, const char *name)
   if (found) {
     getattr(e.ino, e.attr);
     fuse_reply_entry(req, &e);
-  }
-  else
+  } else {
     fuse_reply_err(req, ENOENT);
+  }
 }
 
 
@@ -246,7 +245,7 @@ fuseserver_readdir(fuse_req_t req, fuse_ino_t ino, size_t size,
   // Ask the yfs_client for the file names / i-numbers
   // in directory inum, and call dirbuf_add() for each.
   std::string buf;
-  if (yfs->get(inum, buf) != extent_protocol::OK) {
+  if (yfs->getdata(inum, buf) != extent_protocol::OK) {
     Z("fuseserver_readdir: get buf not ok\n");
     fuse_reply_err(req, ENOTDIR);
   } else {
@@ -286,13 +285,13 @@ fuseserver_mkdir(fuse_req_t req, fuse_ino_t parent, const char *name,
   e.entry_timeout = 0.0;
   e.generation = 0;
 
-// You fill this in for Lab 3
+  // You fill this in for Lab 3
   int rs = yfs->create(parent, name, false, e.ino);
   if (rs == yfs_client::OK) {
-    rs = getattr(e.ino, e.attr);
-    fuse_reply_entry(req, &e);
+      rs = getattr(e.ino, e.attr);
+      fuse_reply_entry(req, &e);
   } else {
-    fuse_reply_err(req, ENOSYS);
+      fuse_reply_err(req, ENOSYS);
   }
 }
 

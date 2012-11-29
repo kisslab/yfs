@@ -2,6 +2,7 @@
 #include "yfs_client.h"
 #include "extent_client.h"
 #include "lock_client.h"
+#include "lock_client_cache.h"
 #include <sstream>
 #include <iostream>
 #include <stdio.h>
@@ -15,7 +16,8 @@
 yfs_client::yfs_client(std::string extent_dst, std::string lock_dst)
 {
     ec = new extent_client(extent_dst);
-    lc = new lock_client(lock_dst);
+    elr = new ExtentLockRelease(ec);
+    lc = new lock_client_cache(lock_dst, elr);
     srand(time(NULL) + getpid());
 }
 
@@ -24,14 +26,6 @@ yfs_client::inum yfs_client::rand_inum(bool isfile) {
     ret = (unsigned long long) ( (rand() & 0x7fffffff) | (isfile << 31) );
     ret &= 0xffffffff;
     return ret;
-}
-
-void yfs_client::lock(inum ino) {
-    lc->acquire(ino);
-}
-
-void yfs_client::unlock(inum ino) {
-    lc->release(ino);
 }
 
 yfs_client::inum
@@ -74,8 +68,10 @@ yfs_client::getfile(inum inum, fileinfo &fin)
 
   printf("getfile %016llx\n", inum);
   extent_protocol::attr a;
+  ScopedLockClient _(lc, inum);
   if (ec->getattr(inum, a) != extent_protocol::OK) {
     r = IOERR;
+    ERR("getattr error");
     goto release;
   }
 
@@ -83,7 +79,7 @@ yfs_client::getfile(inum inum, fileinfo &fin)
   fin.mtime = a.mtime;
   fin.ctime = a.ctime;
   fin.size = a.size;
-  printf("getfile %016llx -> sz %llu\n", inum, fin.size);
+  printf("getfile %llx -> sz %llu\n", inum, fin.size);
 
  release:
 
@@ -99,6 +95,7 @@ yfs_client::getdir(inum inum, dirinfo &din)
 
   printf("getdir %016llx\n", inum);
   extent_protocol::attr a;
+  ScopedLockClient _(lc, inum);
   if (ec->getattr(inum, a) != extent_protocol::OK) {
     r = IOERR;
     goto release;
@@ -111,30 +108,12 @@ yfs_client::getdir(inum inum, dirinfo &din)
   return r;
 }
 
-int yfs_client::put(inum num, std::string buf) {
-    Z("put: %llx %s\n", num, buf.c_str());
-    extent_protocol::status rs;
-    rs = ec->put(num, buf);
-    if (rs == extent_protocol::OK) {
-        return OK;
-    }
-    return IOERR;
-}
-
-int yfs_client::get(inum num, std::string &buf) {
-    extent_protocol::status rs = ec->get(num, buf);
-    if (rs == extent_protocol::OK) {
-        return OK;
-    }
-    return IOERR;
-}
-
 int yfs_client::create(inum parent, const char * name, bool isfile, unsigned long &ino) {
-    Z("create : parentis %lld name is %s\n", parent, name);
+    Z("create : parentis %llx name is %s\n", parent, name);
     if (isdir(parent)) {
         std::string b;
         ScopedLockClient slc(lc, parent);
-        int rs = get(parent, b);
+        int rs = ec->get(parent, b);
         if (rs != OK) {
             ERR("get parent failed");
             return rs;
@@ -147,12 +126,13 @@ int yfs_client::create(inum parent, const char * name, bool isfile, unsigned lon
         inum num = rand_inum(isfile);
         ino = (unsigned long)(num & 0xffffffff);
         b = b.append(filename(num) + t);
-        rs = put(num, "");
+        ScopedLockClient _(lc, num);
+        rs = ec->put(num, "");
         if (rs != OK) {
             ERR("create file, put operation failed");
             return rs;
         }
-        rs = put(parent, b);
+        rs = ec->put(parent, b);
         if (rs != OK) {
             ERR("update parent failed");
             return rs;
@@ -163,15 +143,21 @@ int yfs_client::create(inum parent, const char * name, bool isfile, unsigned lon
 }
 
 bool yfs_client::lookup(inum parent, const char *name, unsigned long &ino) {
-    Z("parent %lld name '%s'\n", parent, name);
+    Z("parent %llx name '%s'\n", parent, name);
     if (isdir(parent)) {
         //printf("%d %d \n", name == NULL, strlen(name));
-        if (name == NULL || strlen(name) < 1) return true;
+        if (name == NULL || strlen(name) < 1) {
+            ERR("lookup null");
+            return true;
+        }
         std::string b;
-        int rs = get(parent, b);
+        ScopedLockClient slc(lc, parent);
+        int rs = ec->get(parent, b);
         if (rs != OK) {
             ERR("look up parent failed");
             return false;
+        } else {
+            Z("%llx content: %s", parent, b.c_str());
         }
         std::string t = "/" + std::string(name) + "/";
         size_t found = b.find(t);
@@ -193,9 +179,12 @@ bool yfs_client::lookup(inum parent, const char *name, unsigned long &ino) {
 }
 
 int yfs_client::read(inum ino, size_t size, off_t off, std::string &ret) {
+    Z("read: size = %lu, off = %ld", size, off);
     std::string buf;
-    int rs = get(ino, buf);
+    ScopedLockClient _(lc, ino);
+    int rs = ec->get(ino, buf);
     if (rs != OK) {
+        ERR("extent client get rs not OK: %d", rs);
         return rs;
     }
     if (off + size > buf.size()) {
@@ -206,6 +195,7 @@ int yfs_client::read(inum ino, size_t size, off_t off, std::string &ret) {
     } else {
         ret = buf.substr(off, size);
     }
+    //Z("read result = %s", ret.c_str());
     return OK;
 }
 
@@ -216,7 +206,7 @@ int yfs_client::write(inum ino, const char * buf, size_t size, off_t off) {
     size_t uoff = (unsigned)off;
     std::string ori;
     ScopedLockClient slc(lc, ino);
-    int rs = get(ino, ori);
+    int rs = ec->get(ino, ori);
     if (rs != OK) {
         return rs;
     }
@@ -233,14 +223,14 @@ int yfs_client::write(inum ino, const char * buf, size_t size, off_t off) {
         after = ori.append(std::string(a, gap));
         after = after.append(std::string(buf, size));
     }
-    rs = put(ino, after);
+    rs = ec->put(ino, after);
     return rs;
 }
 
 int yfs_client::setattr(inum fileno, struct stat *attr) {
     std::string buf;
     ScopedLockClient slc(lc, fileno);
-    int rs = get(fileno, buf);
+    int rs = ec->get(fileno, buf);
     if (rs != OK) {
         return rs;
     }
@@ -253,12 +243,12 @@ int yfs_client::setattr(inum fileno, struct stat *attr) {
     } else {
         buf = buf.substr(0, attr->st_size);
     }
-    rs = put(fileno, buf);
+    rs = ec->put(fileno, buf);
     return rs;
 }
 
 int yfs_client::unlink(inum parent, const char *name) {
-    Z("unlink parent %lld name '%s'\n", parent, name);
+    Z("unlink parent %llx name '%s'\n", parent, name);
     if (isdir(parent)) {
         //printf("%d %d \n", name == NULL, strlen(name));
         if (name == NULL || strlen(name) < 1) {
@@ -266,7 +256,7 @@ int yfs_client::unlink(inum parent, const char *name) {
         }
         std::string b;
         ScopedLockClient slc(lc, parent);
-        int rs = get(parent, b);
+        int rs = ec->get(parent, b);
         if (rs != OK) {
             ERR("rs = %d", rs);
             return NOENT;
@@ -296,7 +286,7 @@ int yfs_client::unlink(inum parent, const char *name) {
             if (found + t.size() < b.size()) {
                 after = after.append(b.substr(found + t.size(), b.size() - found - t.size()));
             }
-            rs = put(parent, after);
+            rs = ec->put(parent, after);
             if (rs != OK) {
                 ERR("put parent failed");
                 return NOENT;
@@ -311,3 +301,7 @@ int yfs_client::unlink(inum parent, const char *name) {
     return NOENT;
 }
 
+int yfs_client::getdata(inum ino, std::string & buf) {
+    ScopedLockClient _(lc, ino);
+    return ec->get(ino, buf);
+}

@@ -205,7 +205,6 @@ simple_tests(rpcc *c)
 	VERIFY(rep.size() == 70000);
 	printf("   -- small request, big reply .. ok\n");
 
-#if 0
 	// too few arguments
 	intret = c->call(22, (std::string)"just one", rep);
 	VERIFY(intret < 0);
@@ -221,7 +220,6 @@ simple_tests(rpcc *c)
 	intret = c->call(23, (std::string)"hello", (std::string)" goodbye", wrongrep);
 	VERIFY(intret < 0);
 	printf("   -- wrong ret value size .. failed ok\n");
-#endif
 
 	// specify a timeout value to an RPC that should succeed (udp)
 	int xx = 0;

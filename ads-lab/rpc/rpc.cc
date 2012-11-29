@@ -297,16 +297,16 @@ rpcc::call1(unsigned int proc, marshall &req, unmarshall &rep,
 		}
 	}
 
-  if (ca.done && lossytest_)
-  {
-    ScopedLock ml(&m_);
-    if (!dup_req_.isvalid()) {
-      dup_req_.buf.assign(req.cstr(), req.size());
-      dup_req_.xid = ca.xid;
-    }
-    if (xid_rep > xid_rep_done_)
-      xid_rep_done_ = xid_rep;
-  }
+        if (ca.done && lossytest_)
+        {
+                ScopedLock ml(&m_);
+                if (!dup_req_.isvalid()) {
+                        dup_req_.buf.assign(req.cstr(), req.size());
+                        dup_req_.xid = ca.xid;
+                }
+                if (xid_rep > xid_rep_done_)
+                        xid_rep_done_ = xid_rep;
+        }
 
 	ScopedLock cal(&ca.m);
 
@@ -426,7 +426,7 @@ rpcs::rpcs(unsigned int p1, int count)
 	}
 
 	reg(rpc_const::bind, this, &rpcs::rpcbind);
-	dispatchpool_ = new ThrPool(6,false);
+	dispatchpool_ = new ThrPool(10,false);
 
 	listener_ = new tcpsconn(this, port_, lossytest_);
 }
@@ -589,13 +589,13 @@ rpcs::dispatch(djob_t *j)
 			}
 
 			rh.ret = f->fn(req, rep);
-      if (rh.ret == rpc_const::unmarshal_args_failure) {
+                        if (rh.ret == rpc_const::unmarshal_args_failure) {
                                 fprintf(stderr, "rpcs::dispatch: failed to"
                                        " unmarshall the arguments. You are"
                                        " probably calling RPC 0x%x with wrong"
                                        " types of arguments.\n", proc);
                                 VERIFY(0);
-      }
+                        }
 			VERIFY(rh.ret >= 0);
 
 			rep.pack_reply_header(rh);
@@ -643,14 +643,8 @@ rpcs::dispatch(djob_t *j)
 }
 
 // rpcs::dispatch calls this when an RPC request arrives.
-//
 // checks to see if an RPC with xid from clt_nonce has already been received.
-// if not, remembers the request in reply_window_.
-//
-// deletes remembered requests with XIDs <= xid_rep; the client
-// says it has received a reply for every RPC up through xid_rep.
-// frees the reply_t::buf of each such request.
-//
+// if not, remembers the request.
 // returns one of:
 //   NEW: never seen this xid before.
 //   INPROGRESS: seen this xid, and still processing it.
@@ -661,71 +655,54 @@ rpcs::checkduplicate_and_update(unsigned int clt_nonce, unsigned int xid,
 		unsigned int xid_rep, char **b, int *sz)
 {
 	ScopedLock rwl(&reply_window_m_);
-
-  rpcs::rpcstate_t rv;
-  bool found_reply = false;
-  std::list<reply_t>::iterator reply;
-  std::map<unsigned int, std::list<reply_t> >::iterator client_window =
-      reply_window_.find(clt_nonce);
-
-  if (client_window != reply_window_.end()) {
-    for (reply = client_window->second.begin();
-        reply != client_window->second.end(); ++reply) {
-      if (reply->xid == xid) {
-        found_reply = true;
-        break;
-      }
-    }
-  }
-
-  if (found_reply) {
-    if (reply->cb_present) {
-      *b = reply->buf;
-      *sz = reply->sz;
-      rv = DONE;
-    } else {
-      rv = INPROGRESS;
-    }
-  } else {
-    std::map<unsigned int, unsigned int>::iterator highest_xid_rep =
-        highest_xid_rep_.find(clt_nonce);
-
-    if (highest_xid_rep != highest_xid_rep_.end()
-        && highest_xid_rep->second >= xid) {
-      rv = FORGOTTEN;
-    } else {
-      if (client_window == reply_window_.end()) {
-        client_window = reply_window_.insert(std::make_pair(clt_nonce,
-            std::list<reply_t>())).first;
-      }
-      client_window->second.push_back(reply_t(xid));
-
-      if (highest_xid_rep != highest_xid_rep_.end()) {
-        if (xid_rep > highest_xid_rep->second) {
-          highest_xid_rep->second = xid_rep;
+        // You fill this in for Lab 1.
+    assert(xid > xid_rep);
+    //printf("client = %d, xid = %d, xid_rep = %d\n", clt_nonce, xid, xid_rep);
+    std::list<reply_t> &window = reply_window_[clt_nonce];
+    std::list<reply_t>::iterator it;
+    if (window.size()) {
+        reply_t & front = window.front();
+        reply_t & back = window.back();
+        if (front.xid <= xid_rep) {
+            for (it = window.begin(); it->xid <= xid_rep && it != window.end(); ++it) {
+                if (!it->cb_present || !it->buf) {
+                    break;
+                }
+                free((*it).buf);
+            }
+            window.erase(window.begin(), it);
         }
-      } else {
-        highest_xid_rep = highest_xid_rep_.insert(
-            std::make_pair(clt_nonce, xid_rep)).first;
-      }
-
-      for (std::list<reply_t>::iterator iter = client_window->second.begin();
-          iter != client_window->second.end(); ) {
-        if (iter->xid <= highest_xid_rep->second) {
-          std::list<reply_t>::iterator to_remove = iter;
-          ++iter;
-          free(to_remove->buf);
-          client_window->second.erase(to_remove);
-        } else {
-          ++iter;
+        if (window.size()) {
+            if (window.front().xid > xid) return FORGOTTEN;
+            if (back.xid >= xid) {
+                for (it = window.begin(); it != window.end(); ++it) {
+                    if ((*it).xid == xid) {
+                        if (it->cb_present) {
+                            return INPROGRESS;
+                        } else {
+                            *b = it->buf;
+                            *sz = it->sz;
+                            return DONE;
+                        }
+                    }
+                }
+            }
         }
-      }
-
-      rv = NEW;
     }
-  }
-
-  return rv;
+    reply_t r(xid);
+    r.cb_present = true;
+    bool inserted = false;
+    for (it = window.begin(); it != window.end(); ++it) {
+        if (it->xid > xid) {
+            window.insert(it, r);
+            inserted = true;
+            break;
+        }
+    }
+    if (!inserted) {
+        window.push_back(r);
+    }
+    return NEW;
 }
 
 // rpcs::dispatch calls add_reply when it is sending a reply to an RPC,
@@ -738,16 +715,18 @@ rpcs::add_reply(unsigned int clt_nonce, unsigned int xid,
 		char *b, int sz)
 {
 	ScopedLock rwl(&reply_window_m_);
-  std::map<unsigned int, std::list<reply_t> >::iterator window =
-      reply_window_.find(clt_nonce);
-  for (std::list<reply_t>::iterator iter = window->second.begin();
-      iter != window->second.end(); ++iter) {
-    if (iter->xid == xid) {
-      iter->buf = b;
-      iter->sz = sz;
-      iter->cb_present = true;
+        // You fill this in for Lab 1.
+    std::list<reply_t> &window = reply_window_[clt_nonce];
+    assert(window.size() > 0);
+    std::list<reply_t>::iterator it;
+    for (it = window.begin(); it != window.end(); ++it) {
+        if (it->xid == xid) {
+            it->buf = b;
+            it->sz = sz;
+            it->cb_present = false;
+            break;
+        }
     }
-  }
 }
 
 void
